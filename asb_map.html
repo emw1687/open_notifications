@@ -1,0 +1,107 @@
+<html>
+ <head>
+   <style type="text/css">
+     html, body { height: 100%; margin: 0; padding: 0; }
+     #map {
+       height: 100%;
+     }
+   </style>
+ </script>
+ </head>
+ <body>
+   <div class="options-box">
+     <h1>Asbestos in Massachusetts</h1>
+     <h2>Notifications submitted between 10/15/2016 and 12/1/2016</h2>
+       <div>
+         <label for="contractorSearch">Contractor:</label>
+         <input id="contractorSearch" type="text">
+         <label for="dateSearch">Date:</label>
+         <input id="dateSearch" type="date">
+         <input id="filter" type="button" value="Filter">
+         <input id="showAll" type="button" value="Show All">
+       </div>
+     </div>
+   <div id="map"></div>
+   <script>
+     //define variables
+     var map;
+     var infoWindow;
+     var iconbase = 'http://maps.google.com/mapfiles/ms/icons/';
+     var iconaq06 = iconbase + 'yellow.png';
+     var iconanf001 = iconbase + 'red.png';
+
+     function initMap() {
+       //initialize map and global variables
+       map = new google.maps.Map(document.getElementById('map'), {
+         zoom: 9,
+         center: {lat: 42.051435, lng: -71.881482}
+       });
+
+       infoWindow = new google.maps.InfoWindow();
+
+       // load json
+       map.data.loadGeoJson('where.json');
+
+       //set icons by form type; set title
+       map.data.setStyle(function(feature){
+         var formtype = feature.getProperty('formtype');
+         if (formtype == 'aq06') { icontype = iconaq06 }
+         else { icontype = iconanf001 };
+         return {
+           icon : icontype
+         };
+       });
+
+       //add on click event listener to open infoWindows
+       map.data.addListener('click', function(event) {
+         var sticker = event.feature.getProperty('sticker');
+         var address = event.feature.getProperty('address');
+         var contractor = event.feature.getProperty('contractor');
+         var title = sticker + '<br>' + address + '<br>' + contractor;
+         infoWindow.setContent("<div>" + title + "</div>");
+         infoWindow.setPosition(event.feature.getGeometry().get());
+         infoWindow.open(map);
+       });
+
+       //add functionality to filter and show all buttons
+       document.getElementById('filter').addEventListener('click', filter);
+       document.getElementById('showAll').addEventListener('click', showAll);
+
+       //define functions
+       function filter() {
+         map.data.revertStyle();
+         var contractorSearch = document.getElementById('contractorSearch').value;
+         contractorSearch = String(contractorSearch).toUpperCase();
+
+         var dateSearch = new Date(String(document.getElementById('dateSearch').value));
+
+         console.log(contractorSearch, dateSearch);
+
+         map.data.forEach(function(feature){
+           var sticker = feature.getProperty('sticker');
+           //contractor search
+           var contractor = feature.getProperty('contractor');
+           contractor = String(contractor).toUpperCase();
+           //date search
+           var startdate = new Date(String(feature.getProperty('startdate')));
+           var enddate = new Date(String(feature.getProperty('enddate')));
+           //filter
+           if (contractor.indexOf(contractorSearch) < 0 || startdate > dateSearch || enddate < dateSearch) {
+             map.data.overrideStyle(feature, { visible : false });
+           }
+           //console.log(sticker, startdate, enddate, contractor.indexOf(contractorSearch), startdate < dateSearch, enddate > dateSearch);
+         });
+       };
+
+       function showAll() {
+         map.data.revertStyle();
+         document.getElementById('contractorSearch').value = "";
+         document.getElementById('dateSearch').value = "";
+       };
+
+     }
+   </script>
+   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBZkXtmv9aAapicnQGx4su7mqb_jWIvMUg&callback=initMap">
+   </script>
+ </body>
+</html>
