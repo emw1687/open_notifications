@@ -9,14 +9,23 @@
    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
    <script type="text/javascript" src="selectize.js"></script>
    <link rel="stylesheet" type="text/css" href="selectize.css" />
+   <script>
+   function optionsList() {
+     //var options = [];
+     map.data.forEach( function(feature) {
+       options.push(feature.getProperty('contractor'));
+     })
+     console.log(options);
+   };
+   </script>
  </head>
  <body>
    <div class="options-box">
      <h1>Asbestos in Massachusetts</h1>
-     <h2>Notifications submitted between 10/15/2016 and 12/1/2016</h2>
+     <h2>Notifications submitted between 10/1/2016 and 12/1/2016</h2>
        <div>
          <label for="contractorSearch">Contractor:</label>
-         <input id="contractorSearch" type="text">
+         <input id="contractorSearch" type="text" onfocus = "optionsList(this)">
          <label for="dateSearch">Date:</label>
          <input id="dateSearch" type="date">
          <input id="filter" type="button" value="Filter">
@@ -31,6 +40,7 @@
      var iconbase = 'http://maps.google.com/mapfiles/ms/icons/';
      var iconaq06 = iconbase + 'yellow.png';
      var iconanf001 = iconbase + 'red.png';
+     var options = [];
 
      function initMap() {
        //initialize map and global variables
@@ -53,6 +63,12 @@
            icon : icontype
          };
        });
+
+       // initialize the Selectize control
+       var $select = $('select').selectize(options);
+
+       // fetch the instance
+       var selectize = $select[0].selectize;
 
        //add on click event listener to open infoWindows
        map.data.addListener('click', function(event) {
@@ -80,7 +96,7 @@
 
          //console.log(contractorSearch, dateSearch);
 
-         map.data.forEach(function(feature){
+         map.data.forEach( function(feature) {
            var sticker = feature.getProperty('sticker');
            //contractor search
            var contractor = feature.getProperty('contractor');
