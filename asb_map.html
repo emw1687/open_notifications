@@ -72,12 +72,13 @@
        //define functions
        function filter() {
          map.data.revertStyle();
+         infoWindow.close();
          var contractorSearch = document.getElementById('contractorSearch').value;
          contractorSearch = String(contractorSearch).toUpperCase();
 
          var dateSearch = new Date(String(document.getElementById('dateSearch').value));
 
-         console.log(contractorSearch, dateSearch);
+         //console.log(contractorSearch, dateSearch);
 
          map.data.forEach(function(feature){
            var sticker = feature.getProperty('sticker');
@@ -97,6 +98,7 @@
 
        function showAll() {
          map.data.revertStyle();
+         infoWindow.close();
          document.getElementById('contractorSearch').value = "";
          document.getElementById('dateSearch').value = "";
        };
