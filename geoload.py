@@ -26,8 +26,7 @@ with open('where.csv', 'rb') as fh:
     projects = list(reader)
 count = 0
 for line in projects:
-    #if count > 2000 : break
-    if count > 5 : break
+    if count > 1500 : break
     address = line[0].strip()
     formtype = line[1]
     sticker = line[2]
