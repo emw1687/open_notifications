@@ -2,8 +2,28 @@
  <head>
    <style type="text/css">
      html, body { height: 100%; margin: 0; padding: 0; }
+     #options-box {
+       background: #fff;
+       border: 1px solid #999;
+       border-radius: 3px;
+       height: 100%;
+       width: 33%;
+       padding-left: 1%;
+       padding-right: 1%;
+       line-height: 35px;
+       text-align: left;
+       float: left;
+       position: absolute;
+       z-index: 1;
+       left: 0;
+     }
+
      #map {
        height: 100%;
+       width: 65%;
+       position: absolute;
+       z-index: 1;
+       right: 0;
      }
    </style>
    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
@@ -20,7 +40,7 @@
    </script>
  </head>
  <body>
-   <div class="options-box">
+   <div id="options-box">
      <h1>Asbestos in Massachusetts</h1>
      <h2>Notifications submitted between 10/1/2016 and 12/1/2016</h2>
        <div>
