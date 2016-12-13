@@ -25,6 +25,8 @@
        z-index: 1;
        right: 0;
      }
+
+
    </style>
    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
    <script type="text/javascript" src="selectize.js"></script>
@@ -44,12 +46,14 @@
      <h1>Asbestos in Massachusetts</h1>
      <h2>Notifications submitted between 10/1/2016 and 12/1/2016</h2>
        <div>
-         <label for="contractorSearch">Contractor:</label>
-         <input id="contractorSearch" type="text" onfocus = "optionsList(this)">
-         <label for="dateSearch">Date:</label>
-         <input id="dateSearch" type="date">
+         <label for="stickerSearch">Project Number</label>
+         <input id="stickerSearch"  class ="controls" type="text">
+         <label for="contractorSearch">Contractor</label>
+         <input id="contractorSearch"  class ="controls" type="text" onfocus = "optionsList(this)">
+         <label for="dateSearch">Date</label>
+         <input id="dateSearch"  class ="controls" type="date">
          <input id="filter" type="button" value="Filter">
-         <input id="showAll" type="button" value="Show All">
+         <input id="showAll"  type="button" value="Show All">
        </div>
      </div>
    <div id="map"></div>
