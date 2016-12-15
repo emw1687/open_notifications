@@ -78,15 +78,6 @@
    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
    <script type="text/javascript" src="selectize.js"></script>
    <link rel="stylesheet" type="text/css" href="selectize.css" />
-   <script>
-   function optionsList() {
-     //var options = [];
-     map.data.forEach( function(feature) {
-       options.push(feature.getProperty('contractor'));
-     })
-     console.log(options);
-   };
-   </script>
  </head>
  <body>
    <div id="options-box">
@@ -117,14 +108,13 @@
    <div id="map"></div>
    <script>
      //define variables
-     var map;
-     var infoWindow;
+     var map, heatmap, infoWindow, input, searchBox, notifications;
      var iconbase = 'http://maps.google.com/mapfiles/ms/icons/';
      var iconaq06 = iconbase + 'yellow.png';
      var iconanf001 = iconbase + 'red.png';
-     var iconstar = iconbase + 'blue.png'
-     var options = [];
-     var notifications;
+     var iconstar = iconbase + 'blue.png';
+     var markers = [];
+     var heatmappts = [];
 
      function initMap() {
        //initialize map
@@ -150,12 +140,6 @@
          };
        });
 
-       // initialize the Selectize control
-       //var $select = $('select').selectize(options);
-
-       // fetch the instance
-       //var selectize = $select[0].selectize;
-
        //add on click event listener to open infoWindows
        map.data.addListener('click', function(event) {
          var sticker = event.feature.getProperty('sticker');
@@ -171,107 +155,106 @@
        document.getElementById('filter').addEventListener('click', filter);
        document.getElementById('showAll').addEventListener('click', showAll);
 
-       //define functions
-       function filter() {
-         map.data.revertStyle();
-         infoWindow.close();
 
-         var contractorSearch = document.getElementById('contractorSearch').value;
-         contractorSearch = String(contractorSearch).toUpperCase();
+        //search box
+        // Create the search box and link it to the UI element.
+        input = document.getElementById('pac-input');
+        searchBox = new google.maps.places.SearchBox(input);
+        //map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
 
-         var stickerSearch = document.getElementById('stickerSearch').value;
-         stickerSearch = String(stickerSearch);
-         if (stickerSearch.length > 9) {
-           stickerSearch = stickerSearch.slice(0,9);
-         };
+        // Bias the SearchBox results towards current map's viewport.
+        map.addListener('bounds_changed', function() {
+          searchBox.setBounds(map.getBounds());
+        });
 
-         var dateSearch = new Date(String(document.getElementById('dateSearch').value));
+        // Listen for the event fired when the user selects a prediction and retrieve
+        // more details for that place.
+        searchBox.addListener('places_changed', function() {
+          var places = searchBox.getPlaces();
 
-         //console.log(contractorSearch, dateSearch);
+          if (places.length == 0) {
+            return;
+          }
 
-         map.data.forEach( function(feature) {
-           var sticker = feature.getProperty('sticker');
-           //sticker search
-           var sticker = feature.getProperty('sticker');
-           sticker = String(sticker);
-           //contractor search
-           var contractor = feature.getProperty('contractor');
-           contractor = String(contractor).toUpperCase();
-           //date search
-           var startdate = new Date(String(feature.getProperty('startdate')));
-           var enddate = new Date(String(feature.getProperty('enddate')));
-           //filter
-           if (contractor.indexOf(contractorSearch) < 0 || sticker.indexOf(stickerSearch) < 0 || startdate > dateSearch || enddate < dateSearch) {
-             map.data.overrideStyle(feature, { visible : false });
-           }
-           //console.log(sticker, startdate, enddate, contractor.indexOf(contractorSearch), startdate < dateSearch, enddate > dateSearch);
-         });
+          // Clear out the old markers.
+          markers.forEach(function(marker) {
+            marker.setMap(null);
+          });
+          markers = [];
+
+          // For each place, get the icon, name and location.
+          var bounds = new google.maps.LatLngBounds();
+          places.forEach(function(place) {
+            if (!place.geometry) {
+              console.log("Returned place contains no geometry");
+              return;
+            }
+
+            // Create a marker for each place.
+            markers.push(new google.maps.Marker({
+              map: map,
+              icon: iconstar,
+              title: place.name,
+              position: place.geometry.location
+            }));
+
+            if (place.geometry.viewport) {
+              // Only geocodes have viewport.
+              bounds.union(place.geometry.viewport);
+            } else {
+              bounds.extend(place.geometry.location);
+            }
+          });
+          map.fitBounds(bounds);
+        });
+     };
+
+     //define functions
+     function filter() {
+       map.data.revertStyle();
+       infoWindow.close();
+
+       var contractorSearch = document.getElementById('contractorSearch').value;
+       contractorSearch = String(contractorSearch).toUpperCase();
+
+       var stickerSearch = document.getElementById('stickerSearch').value;
+       stickerSearch = String(stickerSearch);
+       if (stickerSearch.length > 9) {
+         stickerSearch = stickerSearch.slice(0,9);
        };
 
-       function showAll() {
-         map.data.revertStyle();
-         infoWindow.close();
-         document.getElementById('stickerSearch').value = "";
-         document.getElementById('contractorSearch').value = "";
-         document.getElementById('dateSearch').value = "";
-       };
+       var dateSearch = new Date(String(document.getElementById('dateSearch').value));
 
-       //search box
-       // Create the search box and link it to the UI element.
-       var input = document.getElementById('pac-input');
-       var searchBox = new google.maps.places.SearchBox(input);
-       //map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+       //console.log(contractorSearch, dateSearch);
 
-       // Bias the SearchBox results towards current map's viewport.
-       map.addListener('bounds_changed', function() {
-         searchBox.setBounds(map.getBounds());
-       });
-
-       var markers = [];
-       // Listen for the event fired when the user selects a prediction and retrieve
-       // more details for that place.
-       searchBox.addListener('places_changed', function() {
-         var places = searchBox.getPlaces();
-
-         if (places.length == 0) {
-           return;
+       map.data.forEach( function(feature) {
+         //sticker search
+         var sticker = feature.getProperty('sticker');
+         sticker = String(sticker);
+         //contractor search
+         var contractor = feature.getProperty('contractor');
+         contractor = String(contractor).toUpperCase();
+         //date search
+         var startdate = new Date(String(feature.getProperty('startdate')));
+         var enddate = new Date(String(feature.getProperty('enddate')));
+         //filter
+         if (contractor.indexOf(contractorSearch) < 0 || sticker.indexOf(stickerSearch) < 0 || startdate > dateSearch || enddate < dateSearch) {
+           map.data.overrideStyle(feature, { visible : false });
          }
-
-         // Clear out the old markers.
-         markers.forEach(function(marker) {
-           marker.setMap(null);
-         });
-         markers = [];
-
-         // For each place, get the icon, name and location.
-         var bounds = new google.maps.LatLngBounds();
-         places.forEach(function(place) {
-           if (!place.geometry) {
-             console.log("Returned place contains no geometry");
-             return;
-           }
-
-           // Create a marker for each place.
-           markers.push(new google.maps.Marker({
-             map: map,
-             icon: iconstar,
-             title: place.name,
-             position: place.geometry.location
-           }));
-
-           if (place.geometry.viewport) {
-             // Only geocodes have viewport.
-             bounds.union(place.geometry.viewport);
-           } else {
-             bounds.extend(place.geometry.location);
-           }
-         });
-         map.fitBounds(bounds);
+         //console.log(sticker, startdate, enddate, contractor.indexOf(contractorSearch), startdate < dateSearch, enddate > dateSearch);
        });
+     };
 
-     }
+     function showAll() {
+       map.data.revertStyle();
+       infoWindow.close();
+       document.getElementById('stickerSearch').value = "";
+       document.getElementById('contractorSearch').value = "";
+       document.getElementById('dateSearch').value = "";
+     };
+
    </script>
-   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBZkXtmv9aAapicnQGx4su7mqb_jWIvMUg&libraries=places&callback=initMap">
+   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBZkXtmv9aAapicnQGx4su7mqb_jWIvMUg&libraries=places,visualization&callback=initMap">
    </script>
 
  </body>
