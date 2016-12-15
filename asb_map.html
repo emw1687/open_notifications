@@ -13,7 +13,7 @@
        border: 1px solid #999;
        border-radius: 3px;
        height: 100%;
-       width: 33%;
+       width: 20%;
        padding-left: 1%;
        padding-right: 1%;
        line-height: 35px;
@@ -26,7 +26,7 @@
 
      #map {
        height: 100%;
-       width: 65%;
+       width: 78%;
        position: absolute;
        z-index: 1;
        right: 0;
@@ -51,7 +51,7 @@
        margin-bottom: 10px;
        padding: 0 11px 0 13px;
        text-overflow: ellipsis;
-       width: 300px;
+       width: 95%;
        display: block;
      }
 
@@ -86,7 +86,9 @@
  <body>
    <div id="options-box">
      <h2>Asbestos in Massachusetts</h2>
-     <p>AQ04s and  AQ06s were submitted for #### projects between 09/01/2016 and 12/01/2016</p>
+     <p>
+       AQ04s and  AQ06s were submitted for #### projects between 09/01/2016 and 12/01/2016
+     </p>
        <div>
          <h3>Filter AQ04s and AQ06s by:</h3>
          <label for="stickerSearch">Project Number</label>
@@ -113,9 +115,10 @@
      var iconanf001 = iconbase + 'red.png';
      var iconstar = iconbase + 'blue.png'
      var options = [];
+     var notifications;
 
      function initMap() {
-       //initialize map and global variables
+       //initialize map
        map = new google.maps.Map(document.getElementById('map'), {
          zoom: 8,
          center: {lat: 42.051435, lng: -71.881482}
@@ -261,5 +264,6 @@
    </script>
    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBZkXtmv9aAapicnQGx4su7mqb_jWIvMUg&libraries=places&callback=initMap">
    </script>
+
  </body>
 </html>
