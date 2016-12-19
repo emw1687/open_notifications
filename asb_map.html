@@ -83,7 +83,7 @@
    <div id="options-box">
      <h2>Asbestos in Massachusetts</h2>
      <p>
-       AQ04s and  AQ06s were submitted for #### projects between 09/01/2016 and 12/01/2016
+       AQ04s and  AQ06s submitted between 08/01/2016 and 12/18/2016
      </p>
        <div>
          <h3>Filter AQ04s and AQ06s</h3>
@@ -122,7 +122,13 @@
          zoom: 8,
          center: {lat: 42.051435, lng: -71.881482}
        });
-
+/*
+       //heatmap layer
+       heatmap = new google.maps.visualization.HeatmapLayer({
+         data: getPoints,
+         map: map
+       });
+*/
        infoWindow = new google.maps.InfoWindow();
 
        // load json
@@ -251,6 +257,16 @@
        document.getElementById('stickerSearch').value = "";
        document.getElementById('contractorSearch').value = "";
        document.getElementById('dateSearch').value = "";
+     };
+
+     //heatmap data
+     function getPoints() {
+       map.data.forEach( function(feature) {
+           latlng = feature.getGeometry().get();
+           heatmappts.push(latlng);
+       });
+       return heatmappts;
+       console.log(heatmappts);
      };
 
    </script>
